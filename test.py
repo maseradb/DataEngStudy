@@ -1,37 +1,81 @@
-from pyspark.sql import SparkSession
-from pyspark.context import SparkContext
-from pyspark.conf import SparkConf
+import oracledb
+import random
+import string
+from credentials import *
 
-key_credential = 'svc_spark.json'
+letters = string.ascii_uppercase
 
-table_name='SPARKUSERS'
+un = USERNAME_ONP
+pw = PASSWORD_ONP
+cs = URL_ONP
 
-conf = SparkConf() \
-	.setMaster('local[*]') \
-	.setAppName(f'OCI -> GCS - {table_name} Spark Integration') \
-	.set("spark.jars", "gcs-connector-hadoop2-latest.jar") \
-	.set("fs.gs.impl", "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem")\
-	.set("fs.AbstractFileSystem.gs.impl", "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS")\
-	.set("spark.hadoop.google.cloud.auth.service.account.enable", "true") \
-	.set("spark.hadoop.google.cloud.auth.service.account.json.keyfile", key_credential)\
-    .set('spark.driver.extraClassPath', "/home/maseradb/Projects/*")\
-    .set('temporaryGcsBucket', 'gs://maseradb-stage/')
-    
-sc = SparkContext(conf=conf) 
-
-spark = SparkSession.builder\
-    .config(conf=sc.getConf()) \
-    .getOrCreate()
-
-jdbcDF = spark.read \
-    .format("jdbc") \
-    .option("url", "jdbc:oracle:thin:@(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.sa-saopaulo-1.oraclecloud.com))(connect_data=(service_name=gda48883422ef71_oradb_low.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))") \
-    .option("dbtable", 'SPARKUSERS') \
-    .option("user", "SPARK") \
-    .option("password", "MaseraDB1234") \
-    .option("driver", "oracle.jdbc.driver.OracleDriver") \
-    .load()
-
-jdbcDF.write.format('parquet')\
-    .mode('overwrite')\
-    .save(f'gs://maseradb-bronze/{table_name}/')
+connection = oracledb.connect(user=un, password=pw, dsn=cs)
+cursor = connection.cursor()
+for i in range (1, 10000000):
+	if (i % 5000==0): print(i)
+	cursor.execute("COMMIT")
+	i1 = i	
+	v1   = ( ''.join(random.choice(letters) for i in range(600)) )
+	v2	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v3	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v4	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v5	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v6	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v7	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v8	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v9	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v10	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v11	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v12	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v13	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v14	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v15	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v16	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v17	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v18	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v19	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v20	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v21	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v22	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v23	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v24	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v25	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v26	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v27	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v28	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v29	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v30	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v31	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v32	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v33	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v34	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v35	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v36	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v37	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v38	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v39	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v40	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v41	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v42	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v43	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v44	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v45	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v46	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v47	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v48	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v49	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v50	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v51	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v52	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v53	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v54	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v55	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v56	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v57	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v58	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v59	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	v60	 = ( ''.join(random.choice(letters) for i in range(600)) )
+	cursor.execute("INSERT INTO BIGTABLE VALUES (:si1,:sv1,:sv2,:sv3,:sv4,:sv5,:sv6,:sv7,:sv8,:sv9,:sv10,:sv11,:sv12,:sv13,:sv14,:sv15,:sv16,:sv17,:sv18,:sv19,:sv20,:sv21,:sv22,:sv23,:sv24,:sv25,:sv26,:sv27,:sv28,:sv29,:sv30,:sv31,:sv32,:sv33,:sv34,:sv35,:sv36,:sv37,:sv38,:sv39,:sv40,:sv41,:sv42,:sv43,:sv44,:sv45,:sv46,:sv47,:sv48,:sv49,:sv50,:sv51,:sv52,:sv53,:sv54,:sv55,:sv56,:sv57,:sv58,:sv59,:sv60)", si1=i1,sv1=v1,sv2=v2,sv3=v3,sv4=v4,sv5=v5,sv6=v6,sv7=v7,sv8=v8,sv9=v9,sv10=v10,sv11=v11,sv12=v12,sv13=v13,sv14=v14,sv15=v15,sv16=v16,sv17=v17,sv18=v18,sv19=v19,sv20=v20,sv21=v21,sv22=v22,sv23=v23,sv24=v24,sv25=v25,sv26=v26,sv27=v27,sv28=v28,sv29=v29,sv30=v30,sv31=v31,sv32=v32,sv33=v33,sv34=v34,sv35=v35,sv36=v36,sv37=v37,sv38=v38,sv39=v39,sv40=v40,sv41=v41,sv42=v42,sv43=v43,sv44=v44,sv45=v45,sv46=v46,sv47=v47,sv48=v48,sv49=v49,sv50=v50,sv51=v51,sv52=v52,sv53=v53,sv54=v54,sv55=v55,sv56=v56,sv57=v57,sv58=v58,sv59=v59,sv60=v60)
+connection.commit()
+cursor.close()
+connection.close()
