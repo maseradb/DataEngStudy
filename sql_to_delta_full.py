@@ -4,9 +4,6 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
 import credentials
 
-#import gcp credential
-key_credential = 'svc_spark.json'
-
 # main spark program
 # init application
 if __name__ == '__main__':
@@ -20,7 +17,7 @@ if __name__ == '__main__':
         .config("spark.jars", "/home/maseradb/Projects/gcs-connector-hadoop2-latest.jar") \
         .config("spark.hadoop.google.cloud.auth.service.account.enable", "true") \
         .config("spark.jars.packages", "io.delta:delta-core_2.12:1.2.1")\
-        .config("spark.hadoop.google.cloud.auth.service.account.json.keyfile", key_credential)\
+        .config("spark.hadoop.google.cloud.auth.service.account.json.keyfile", credentials.GCS_KEY)\
         .config('spark.driver.extraClassPath', "/home/maseradb/Projects/*")\
         .config('spark.delta.logStore.gs.impl','io.delta.storage.GCSLogStore')\
         .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension") \
@@ -37,7 +34,7 @@ if __name__ == '__main__':
     # read table from oracleDB
     jdbcDF = spark.read \
         .format("jdbc") \
-        .option("url", credentials.URL_ONP)\
+        .option("url", credentials.URL_ONP2)\
         .option('dbtable', 'BIGTABLE') \
         .option("user", credentials.USERNAME_ONP) \
         .option("password", credentials.PASSWORD_ONP) \

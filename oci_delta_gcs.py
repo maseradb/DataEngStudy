@@ -1,5 +1,6 @@
 import pyspark
 from delta import *
+from credentials import *
 
 key_credential = 'svc_spark.json'
 
@@ -17,10 +18,10 @@ spark = configure_spark_with_delta_pip(builder).getOrCreate()
 
 jdbcDF = spark.read \
     .format("jdbc") \
-    .option("url", "jdbc:oracle:thin:@(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.sa-saopaulo-1.oraclecloud.com))(connect_data=(service_name=gda48883422ef71_oradb_low.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))") \
+    .option("url", URL_OCI) \
     .option('dbtable', 'SPARKUSERS') \
-    .option("user", "SPARK") \
-    .option("password", "MaseraDB1234") \
+    .option("user", USERNAME_OCI) \
+    .option("password", PASSWORD_OCI) \
     .option("driver", "oracle.jdbc.driver.OracleDriver") \
     .load()
 
