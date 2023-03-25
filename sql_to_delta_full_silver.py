@@ -3,6 +3,8 @@ from delta.tables import *
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
 import credentials
+import pyspark.sql.functions as f
+from datetime import datetime
 
 # main spark program
 # init application
@@ -36,15 +38,13 @@ if __name__ == '__main__':
     df = deltaTable.toDF()
     
     # adjust data
-    df.createOrReplaceTempView('vw_bigtable')
-    df = spark.sql("""
-    SELECT ID,
-           COL1,
-           COL2,
-           DATA_REF 
-    FROM vw_bigtable
-    WHERE TRUNC(DATA_REF, 'MONTH') = TRUNC(CURRENT_TIMESTAMP -INTERVAL '0-1' YEAR TO MONTH, 'MONTH')
-    """)
+    actual_year= datetime.now().year
+    actual_month= datetime.now().month
+    
+    df = df.select('ID','COL1','COL2','DATA_REF')\
+        .where(f.year(f.col('DATA_REF')) == actual_year)\
+        .where(f.month(f.col('DATA_REF')) == actual_month)
+    
 
     # print data
     df.show()    
@@ -56,11 +56,11 @@ if __name__ == '__main__':
         .addColumn("COL1", "STRING") \
         .addColumn("COL2", "STRING") \
         .addColumn("DATA_REF", "TIMESTAMP") \
-        .location("gs://maseradb-silver/bigtable_last_month") \
+        .location(f"gs://maseradb-silver/bigtable_last_month-{actual_year}-{actual_month}") \
         .execute()
 
     # write data to silver
-    df.write.format("delta").mode("overwrite").save("gs://maseradb-silver/bigtable_last_month")
+    df.write.format("delta").mode("overwrite").save(f"gs://maseradb-silver/bigtable_last_month-{actual_year}-{actual_month}")
     
     # stop session
     spark.stop()   
