@@ -4,6 +4,7 @@ import string
 from credentials import *
 import oracledb
 import time
+from datetime import datetime
 
 # Variables and isntances
 
@@ -19,6 +20,9 @@ updates=0
 # oradb connection
 connection = oracledb.connect(user=un, password=pw, dsn=cs)
 cursor = connection.cursor()
+
+print('Start Date:')
+print(datetime.now())
 
 # Loop for insert and updates generation
 for i in range(1,10000):
@@ -40,6 +44,8 @@ for i in range(1,10000):
         cursor.execute("INSERT INTO MASERA.BIGTABLE VALUES (MASERA.BIGTABLE_SEQ.NEXTVAL,:sv1,:sv2,CURRENT_DATE)", sv1=v1,sv2=v2)
 
 # Total results
+print('Finish Date:')
+print(datetime.now())
 print('Total Inserts:')
 print(inserts)
 print('Total Updates:')
