@@ -24,6 +24,7 @@ if __name__ == '__main__':
         .config('spark.delta.logStore.gs.impl','io.delta.storage.GCSLogStore')\
         .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension") \
         .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog") \
+        .config("spark.databricks.delta.retentionDurationCheck.enabled",'false')\
         .config('temporaryGcsBucket', 'gs://maseradb-stage/')\
         .getOrCreate()
     
@@ -61,6 +62,6 @@ if __name__ == '__main__':
 
     # write data to silver
     df.write.format("delta").mode("overwrite").save(f"gs://maseradb-silver/bigtable_last_month-{actual_year}-{actual_month}")
-    
+       
     # stop session
     spark.stop()   
