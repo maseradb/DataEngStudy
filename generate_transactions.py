@@ -1,5 +1,4 @@
-from random import randint
-import random
+from random import randint,choice
 import string
 from credentials import *
 import oracledb
@@ -46,8 +45,8 @@ for i in range(1,int(totalQueries)):
     cursor.execute("COMMIT")
     waittiming = int(randint(minQueryInterval,maxQueryInterval))
     time.sleep(waittiming)
-    v1   = ( ''.join(random.choice(letters) for i in range(20)) )
-    v2	 = ( ''.join(random.choice(letters) for i in range(20)) )    
+    v1   = ( ''.join(choice(letters) for i in range(20)) )
+    v2	 = ( ''.join(choice(letters) for i in range(20)) )    
     GENID = int(randint(1,queryRange))
     cursor.execute(f"SELECT COUNT(1) FROM {un}.BIGTABLE WHERE ID= :TEMPID",TEMPID=GENID)
     control = cursor.fetchone()
