@@ -1,17 +1,17 @@
 from random import randint,choice
 import string
-from credentials import *
 import oracledb
 import time
 from datetime import datetime
+from credentials import *
 
 # Variables and isntances
 
 letters = string.ascii_uppercase
 
-un = USERNAME_ONP
-pw = PASSWORD_ONP
-cs = URL_ONP
+un = USERNAME_OCI
+pw = PASSWORD_OCI
+cs = URL_OCI
 
 inserts=0
 updates=0
