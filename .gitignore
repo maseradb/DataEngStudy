@@ -16,3 +16,5 @@
 /sparkusers.parquet
 /svc_spark.json
 /table_updated.sql
+/svc-maseradb-delta.json
+svc-maseradb-delta.json
