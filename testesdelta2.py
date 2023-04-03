@@ -1,16 +1,17 @@
 # import libraries
 from delta.tables import *
 from pyspark.sql import SparkSession
-from pyspark import SparkConf
 from pyspark.sql.functions import *
-import credentials
-
-#import gcp credential
-key_credential = 'svc_spark.json'
+from credentials import *
+import pyspark.sql.functions as f
+from datetime import datetime
 
 # main spark program
 # init application
 if __name__ == '__main__':
+
+    bucketprefix='maseradb-delta'
+    jarsHome='/home/maseradb/DataEngStudy'
 
     # init session
     # set configs
@@ -18,15 +19,15 @@ if __name__ == '__main__':
         .builder \
         .appName('PoC - Lakehouse - GCP') \
         .master('local[*]')\
-        .config("spark.jars", "/home/maseradb/Projects/gcs-connector-hadoop2-latest.jar") \
+        .config("spark.jars", f"{jarsHome}/gcs-connector-hadoop2-latest.jar") \
         .config("spark.hadoop.google.cloud.auth.service.account.enable", "true") \
         .config("spark.jars.packages", "io.delta:delta-core_2.12:1.2.1")\
-        .config("spark.hadoop.google.cloud.auth.service.account.json.keyfile", key_credential)\
-        .config('spark.driver.extraClassPath', "/home/maseradb/Projects/*")\
+        .config("spark.hadoop.google.cloud.auth.service.account.json.keyfile", GCS_KEY)\
+        .config('spark.driver.extraClassPath', f"{jarsHome}/*")\
         .config('spark.delta.logStore.gs.impl','io.delta.storage.GCSLogStore')\
         .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension") \
         .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog") \
-        .config('temporaryGcsBucket', 'gs://maseradb-stage/')\
+        .config('temporaryGcsBucket', f'gs://{bucketprefix}-stage/')\
         .getOrCreate()
     
     # show configured parameters
@@ -35,66 +36,15 @@ if __name__ == '__main__':
     # set log level
     #spark.sparkContext.setLogLevel("INFO")
 
-    # read table from oracleDB
-    jdbcDF = spark.read \
-        .format("jdbc") \
-        .option("url", credentials.URL_ONP)\
-        .option('query', 'SELECT * FROM USUARIOS WHERE UPDATED_AT > SYSDATE -1') \
-        .option("user", credentials.USERNAME_ONP) \
-        .option("password", credentials.PASSWORD_ONP) \
-        .option("driver", "oracle.jdbc.driver.OracleDriver") \
-        .load()
-    
-    # adjust data
-    jdbcDF = jdbcDF\
-    .withColumn("INTEGRATED_AT",to_timestamp(current_timestamp(),"dd-MM-yyyy HH:mm:ss"))\
-    .withColumn("ID",jdbcDF.ID.cast('int'))
+        # adjust data
+    actual_year= datetime.now().year
+    actual_month= datetime.now().month
 
-    # print data
-    #jdbcDF.show()
-
-    # write data to cloud
-    #jdbcDF.write.format("delta").mode("overwrite").save("gs://maseradb-bronze/masera_usuarios")
-
-    # create delta table
-    DeltaTable.createIfNotExists(spark) \
-        .tableName("USUARIO") \
-        .addColumn("ID", "INT") \
-        .addColumn("NAME", "STRING") \
-        .addColumn("SURNAME", "STRING") \
-        .addColumn("PHONE", "STRING") \
-        .addColumn("UPDATED_AT", "TIMESTAMP") \
-        .addColumn("INTEGRATED_AT", "TIMESTAMP") \
-        .location("gs://maseradb-bronze/usuarios") \
-        .execute()
-
-    # read data from the cloud
-    deltaTable = DeltaTable.forPath(spark, "gs://maseradb-bronze/usuarios")
-
-    # Upsert (merge) new data
-    deltaTable.alias("oldData") \
-        .merge(
-            jdbcDF.alias("newData"),
-            "oldData.id = newData.id") \
-        .whenMatchedUpdate(set = { 
-            'id': col('newData.id') ,
-            'name':col('newData.name'),
-            'surname':col('newData.surname'),                                 
-            'phone':col('newData.phone'),
-            'updated_at':col('newData.updated_at'),  
-            'integrated_at':col('newData.integrated_at')})\
-        .whenNotMatchedInsert(values = { 
-            'id': col('newData.id') ,
-            'name':col('newData.name'),
-            'surname':col('newData.surname'),                                 
-            'phone':col('newData.phone'),
-            'updated_at':col('newData.updated_at'),  
-            'integrated_at':col('newData.integrated_at')})\
-        .execute()
-    
-    # show data
+    # read table from bronze
+    deltaTable = DeltaTable.forPath(spark, f"gs://{bucketprefix}-silver/bigtable_last_month-{actual_year}-{actual_month}")
     df = deltaTable.toDF()
-    df.show(truncate=False)
-    
+
+    print(df.count())
+
     # stop session
     spark.stop()   

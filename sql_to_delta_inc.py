@@ -1,7 +1,6 @@
 # import libraries
 from delta.tables import *
 from pyspark.sql import SparkSession
-from pyspark import SparkConf
 from pyspark.sql.functions import *
 from credentials import *
 
@@ -30,11 +29,11 @@ if __name__ == '__main__':
         .getOrCreate()
     
     # show configured parameters
-    print(SparkConf().getAll())
+    #print(SparkConf().getAll())
 
     # set log level
-    spark.sparkContext.setLogLevel("INFO")
-
+    #spark.sparkContext.setLogLevel("INFO")
+ 
     # read table from oracleDB
     jdbcDF = spark.read \
         .format("jdbc") \
