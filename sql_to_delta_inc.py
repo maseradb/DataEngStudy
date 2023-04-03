@@ -3,14 +3,14 @@ from delta.tables import *
 from pyspark.sql import SparkSession
 from pyspark import SparkConf
 from pyspark.sql.functions import *
-import credentials
-
-#import gcp credential
-key_credential = 'svc_spark.json'
+from credentials import *
 
 # main spark program
 # init application
 if __name__ == '__main__':
+
+    bucketprefix='maseradb-delta'
+    jarsHome='/home/maseradb/DataEngStudy'
 
     # init session
     # set configs
@@ -18,16 +18,15 @@ if __name__ == '__main__':
         .builder \
         .appName('PoC - Lakehouse - GCP') \
         .master('local[*]')\
-        .config("spark.jars", "/home/maseradb/Projects/gcs-connector-hadoop2-latest.jar") \
+        .config("spark.jars", f"{jarsHome}/gcs-connector-hadoop2-latest.jar") \
         .config("spark.hadoop.google.cloud.auth.service.account.enable", "true") \
         .config("spark.jars.packages", "io.delta:delta-core_2.12:1.2.1")\
-        .config("spark.hadoop.google.cloud.auth.service.account.json.keyfile", key_credential)\
-        .config('spark.driver.extraClassPath', "/home/maseradb/Projects/*")\
+        .config("spark.hadoop.google.cloud.auth.service.account.json.keyfile", GCS_KEY)\
+        .config('spark.driver.extraClassPath', f"{jarsHome}/*")\
         .config('spark.delta.logStore.gs.impl','io.delta.storage.GCSLogStore')\
         .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension") \
-        .config('spark.databricks.delta.schema.autoMerge.enabled','true')\
         .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog") \
-        .config('temporaryGcsBucket', 'gs://maseradb-stage/')\
+        .config('temporaryGcsBucket', f'gs://{bucketprefix}-stage/')\
         .getOrCreate()
     
     # show configured parameters
@@ -39,10 +38,10 @@ if __name__ == '__main__':
     # read table from oracleDB
     jdbcDF = spark.read \
         .format("jdbc") \
-        .option("url", credentials.URL_ONP2)\
-        .option('query', 'SELECT * FROM BIGTABLE WHERE DATA_REF > SYSDATE -1') \
-        .option("user", credentials.USERNAME_ONP) \
-        .option("password", credentials.PASSWORD_ONP) \
+        .option("url", URL_OCI_SPARK)\
+        .option('query', 'SELECT * FROM BIGTABLE WHERE DATA_REF > CURRENT_DATE -1') \
+        .option("user", USERNAME_OCI) \
+        .option("password", PASSWORD_OCI) \
         .option("driver", "oracle.jdbc.driver.OracleDriver") \
         .load()
     
@@ -55,7 +54,7 @@ if __name__ == '__main__':
     jdbcDF.show()
 
     # read data from the cloud
-    deltaTable = DeltaTable.forPath(spark, "gs://maseradb-bronze/bigtable")
+    deltaTable = DeltaTable.forPath(spark, f"gs://{bucketprefix}-bronze/bigtable")
 
     # Upsert (merge) new data
     deltaTable.alias("oldData") \
@@ -65,10 +64,6 @@ if __name__ == '__main__':
             .whenMatchedUpdateAll()\
             .whenNotMatchedInsertAll()\
         .execute()
-    
-    # show data
-    #df = deltaTable.toDF()
-    #df.show(truncate=False)
     
     # stop session
     spark.stop()   
