@@ -41,7 +41,7 @@ print('Starting processes of upserts:',startTime)
 
 
 # Loop for insert and updates generation
-for i in range(1,int(totalQueries)):
+for i in range(1,totalQueries):
     cursor.execute("COMMIT")
     waittiming = int(randint(minQueryInterval,maxQueryInterval))
     time.sleep(waittiming)
