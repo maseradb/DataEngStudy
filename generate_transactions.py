@@ -26,12 +26,12 @@ for row in totalRecordsCursor:
     totalRecords = row
     print('Total records before execution:',totalRecords)
 
-queryRange = int(totalRecords + (totalRecords /20))
+queryRange = int((totalRecords + (totalRecords /20)))
 
-totalQueries = int(totalRecords/100)
+totalQueries = int(totalRecords/2400)
 print('Upserts to be executed: ', totalQueries)
 
-maxQueryInterval = int(86400 / totalQueries)
+maxQueryInterval = int(3600 / totalQueries)
 minQueryInterval = int(maxQueryInterval / 4)
 print('Minumum time between queries: ',minQueryInterval)
 print('Maximum time between queries: ',maxQueryInterval)

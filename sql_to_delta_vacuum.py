@@ -38,28 +38,10 @@ if __name__ == '__main__':
 
     # read table from bronze
     deltaTable = DeltaTable.forPath(spark, f"gs://{bucketprefix}-bronze/bigtable")
-    df = deltaTable.toDF()
-    
-    # adjust data
-    actual_year= datetime.now().year
-    actual_month= datetime.now().month
-    
-    df = df.select('ID','COL1','COL2','DATA_REF')\
-        .where(f.year(f.col('DATA_REF')) == actual_year)\
-        .where(f.month(f.col('DATA_REF')) == actual_month)
-
-    # create delta table on silver
-    DeltaTable.createIfNotExists(spark) \
-        .tableName("BIGTABLE_LAST_MONTH") \
-        .addColumn("ID", "INT") \
-        .addColumn("COL1", "STRING") \
-        .addColumn("COL2", "STRING") \
-        .addColumn("DATA_REF", "TIMESTAMP") \
-        .location(f"gs://{bucketprefix}-silver/bigtable_{actual_year}-{actual_month}") \
-        .execute()
-
-    # write data to silver
-    df.write.format("delta").mode("overwrite").save(f"gs://{bucketprefix}-silver/bigtable_{actual_year}-{actual_month}")
+        
+    # apply data retention 
+    # default 7 days
+    deltaTable.vacuum()
 
     # stop session
     spark.stop()   
