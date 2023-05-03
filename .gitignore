@@ -6,7 +6,6 @@
 /docker
 /insets.sql
 /ojdbc11.jar
-/ojdbc8.jar
 /register-oracle.json
 /spark-warehouse
 /sparkusers.parquet
@@ -15,3 +14,4 @@
 /svc-maseradb-delta.json
 svc-maseradb-delta.json
 nohup.out
+/testing
