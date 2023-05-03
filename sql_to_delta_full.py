@@ -37,10 +37,10 @@ if __name__ == '__main__':
     # read table from oracleDB
     jdbcDF = spark.read \
         .format("jdbc") \
-        .option("url", URL_OCI_SPARK)\
-        .option('dbtable', 'BIGTABLE') \
-        .option("user", USERNAME_OCI) \
-        .option("password", PASSWORD_OCI) \
+        .option("url", URL_ONP2)\
+        .option('dbtable', 'BATCHTABLE') \
+        .option("user", USERNAME_ONP) \
+        .option("password", PASSWORD_ONP) \
         .option("driver", "oracle.jdbc.driver.OracleDriver") \
         .load()
     
@@ -54,17 +54,17 @@ if __name__ == '__main__':
 
     # create delta table
     DeltaTable.createIfNotExists(spark) \
-        .tableName("BIGTABLE") \
+        .tableName("BATCHTABLE") \
         .addColumn("ID", "INT") \
         .addColumn("COL1", "STRING") \
         .addColumn("COL2", "STRING") \
         .addColumn("DATA_REF", "TIMESTAMP") \
         .addColumn("INTEGRATED_AT","TIMESTAMP") \
-        .location(f"gs://{bucketprefix}-bronze/bigtable") \
+        .location(f"gs://{bucketprefix}-bronze/BATCHTABLE") \
         .execute()
 
     # write data to cloud
-    jdbcDF.write.format("delta").mode("overwrite").save(f"gs://{bucketprefix}-bronze/bigtable")
+    jdbcDF.write.format("delta").mode("overwrite").save(f"gs://{bucketprefix}-bronze/BATCHTABLE")
     
     # stop session
     spark.stop()   

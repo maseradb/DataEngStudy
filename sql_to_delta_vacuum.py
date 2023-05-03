@@ -37,7 +37,7 @@ if __name__ == '__main__':
     #spark.sparkContext.setLogLevel("INFO")
 
     # read table from bronze
-    deltaTable = DeltaTable.forPath(spark, f"gs://{bucketprefix}-bronze/bigtable")
+    deltaTable = DeltaTable.forPath(spark, f"gs://{bucketprefix}-bronze/BATCHTABLE")
         
     # apply data retention 
     # default 7 days

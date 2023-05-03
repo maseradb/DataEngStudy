@@ -9,9 +9,9 @@ from credentials import *
 
 letters = string.ascii_uppercase
 
-un = USERNAME_OCI
-pw = PASSWORD_OCI
-cs = URL_OCI
+un = USERNAME_ONP
+pw = PASSWORD_ONP
+cs = URL_ONP
 
 inserts=0
 updates=0
@@ -20,7 +20,7 @@ updates=0
 connection = oracledb.connect(user=un, password=pw, dsn=cs)
 cursor = connection.cursor()
 
-cursor.execute(f"SELECT COUNT(1) FROM {un}.BIGTABLE")
+cursor.execute(f"SELECT COUNT(1) FROM {un}.BATCHTABLE")
 totalRecordsCursor = cursor.fetchone()
 for row in totalRecordsCursor:
     totalRecords = row
@@ -48,16 +48,16 @@ for i in range(1,totalQueries):
     v1   = ( ''.join(choice(letters) for i in range(20)) )
     v2	 = ( ''.join(choice(letters) for i in range(20)) )    
     GENID = int(randint(1,queryRange))
-    cursor.execute(f"SELECT COUNT(1) FROM {un}.BIGTABLE WHERE ID= :TEMPID",TEMPID=GENID)
+    cursor.execute(f"SELECT COUNT(1) FROM {un}.BATCHTABLE WHERE ID= :TEMPID",TEMPID=GENID)
     control = cursor.fetchone()
     for row in control:
         control = row
     if control == 1:
         updates = updates +1
-        cursor.execute(f"UPDATE {un}.BIGTABLE SET COL1=:sv1,COL2=:sv2,DATA_REF=CURRENT_DATE WHERE ID=:TEMPID",sv1=v1,sv2=v2,TEMPID=GENID)
+        cursor.execute(f"UPDATE {un}.BATCHTABLE SET COL1=:sv1,COL2=:sv2,DATA_REF=CURRENT_DATE WHERE ID=:TEMPID",sv1=v1,sv2=v2,TEMPID=GENID)
     else:
         inserts = inserts +1
-        cursor.execute(f"INSERT INTO {un}.BIGTABLE VALUES ({un}.BIGTABLE_SEQ.NEXTVAL,:sv1,:sv2,CURRENT_DATE)", sv1=v1,sv2=v2)
+        cursor.execute(f"INSERT INTO {un}.BATCHTABLE VALUES ({un}.BATCHTABLE_SEQ.NEXTVAL,:sv1,:sv2,CURRENT_DATE)", sv1=v1,sv2=v2)
 
 # Total results
 finishTime = datetime.now()

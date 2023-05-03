@@ -37,10 +37,10 @@ if __name__ == '__main__':
     # read table from oracleDB
     jdbcDF = spark.read \
         .format("jdbc") \
-        .option("url", URL_OCI_SPARK)\
-        .option('query', 'SELECT * FROM BIGTABLE WHERE DATA_REF > CURRENT_DATE -1') \
-        .option("user", USERNAME_OCI) \
-        .option("password", PASSWORD_OCI) \
+        .option("url", URL_ONP2)\
+        .option('query', "SELECT * FROM BATCHTABLE WHERE DATA_REF > CURRENT_DATE - INTERVAL '1' HOUR") \
+        .option("user", USERNAME_ONP) \
+        .option("password", PASSWORD_ONP) \
         .option("driver", "oracle.jdbc.driver.OracleDriver") \
         .load()
     
@@ -53,7 +53,7 @@ if __name__ == '__main__':
     jdbcDF.show()
 
     # read data from the cloud
-    deltaTable = DeltaTable.forPath(spark, f"gs://{bucketprefix}-bronze/bigtable")
+    deltaTable = DeltaTable.forPath(spark, f"gs://{bucketprefix}-bronze/BATCHTABLE")
 
     # Upsert (merge) new data
     deltaTable.alias("oldData") \

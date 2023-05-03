@@ -37,7 +37,7 @@ if __name__ == '__main__':
     #spark.sparkContext.setLogLevel("INFO")
 
     # read table from bronze
-    deltaTable = DeltaTable.forPath(spark, f"gs://{bucketprefix}-bronze/bigtable")
+    deltaTable = DeltaTable.forPath(spark, f"gs://{bucketprefix}-bronze/BATCHTABLE")
     df = deltaTable.toDF()
     
     # adjust data
@@ -50,16 +50,16 @@ if __name__ == '__main__':
 
     # create delta table on silver
     DeltaTable.createIfNotExists(spark) \
-        .tableName("BIGTABLE_LAST_MONTH") \
+        .tableName("BATCHTABLE_LAST_MONTH") \
         .addColumn("ID", "INT") \
         .addColumn("COL1", "STRING") \
         .addColumn("COL2", "STRING") \
         .addColumn("DATA_REF", "TIMESTAMP") \
-        .location(f"gs://{bucketprefix}-silver/bigtable_{actual_year}-{actual_month}") \
+        .location(f"gs://{bucketprefix}-silver/BATCHTABLE_{actual_year}-{actual_month}") \
         .execute()
 
     # write data to silver
-    df.write.format("delta").mode("overwrite").save(f"gs://{bucketprefix}-silver/bigtable_{actual_year}-{actual_month}")
+    df.write.format("delta").mode("overwrite").save(f"gs://{bucketprefix}-silver/BATCHTABLE_{actual_year}-{actual_month}")
 
     # stop session
     spark.stop()   
