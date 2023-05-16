@@ -24,19 +24,19 @@ if __name__ == '__main__':
             StructField("ID", DoubleType(),True),
             StructField("COL1", StringType(),True),
             StructField("COL2", StringType(),True),
-            StructField("DATA_REF", TimestampType(),True)
+            StructField("DATA_REF", DoubleType(),True)
         ])),
         StructField("after", StructType([
             StructField("ID", DoubleType(),True),
             StructField("COL1", StringType(),True),
             StructField("COL2", StringType(),True),
-            StructField("DATA_REF", TimestampType(),True)
+            StructField("DATA_REF", DoubleType(),True)
         ])),
         StructField("source", StructType([
             StructField("version", StringType(),True),
             StructField("connector", StringType(),True),
             StructField("name", StringType(),True),
-            StructField("ts_ms", TimestampType(),True),
+            StructField("ts_ms", DoubleType(),True),
             StructField("snapshot", StringType(),True),
             StructField("db", StringType(),True),
             StructField("sequence", StringType(),True),
@@ -96,7 +96,11 @@ if __name__ == '__main__':
     newdf = newdf\
         .withColumn("INTEGRATED_AT",to_timestamp(current_timestamp(),"dd-MM-yyyy HH:mm:ss"))\
         .withColumn("ID",newdf.ID.cast('int'))\
-        .withColumn('DATA_REF', date_format(newdf.DATA_REF, 'dd-MM-yyyy HH:mm:ss'))
+        .withColumn('DATA_REF', from_unixtime(col('DATA_REF').cast('bigint'), 'dd-MM-yyyy HH:mm:ss'))
+        #.withColumn('DATA_REF', to_timestamp(newdf.DATA_REF.cast('int'), 'dd-MM-yyyy HH:mm:ss'))
+    
+    #df_formatted = df.withColumn('formatted_timestamp', from_unixtime(col('double_col').cast('bigint'), 'yyyy-MM-dd HH:mm:ss'))
+
 
     newdf.writeStream\
         .format("delta")\
