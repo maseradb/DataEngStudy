@@ -6,6 +6,8 @@ from pyspark.sql.types import *
 from pyspark.sql.functions import *
 from credentials import *
 import pyspark.sql.functions as f
+from datetime import datetime
+import pytz
 
 
 
@@ -17,26 +19,27 @@ if __name__ == '__main__':
     jarsHome='/home/maseradb/DataEngStudy'
     KAFKA_TOPIC = "oracle-log-stream-04.MASERA.STREAMTABLE"
     KAFKA_SERVER = "kafka01:9092"
-    jsonOptions ={"timestampFormat": "yyyy-MM-dd'T'HH:mm:ss.sss'Z'"}
+    jsonOptions ={"timestampFormat": "dd-MM-yyyy HH:mm:ss"}
+    #timezoneBR = "UTC-3"
 
     schema = StructType([
         StructField("before", StructType([
-            StructField("ID", DoubleType(),True),
+            StructField("ID", IntegerType(),True),
             StructField("COL1", StringType(),True),
             StructField("COL2", StringType(),True),
-            StructField("DATA_REF", DoubleType(),True)
+            StructField("DATA_REF", StringType(),True)
         ])),
         StructField("after", StructType([
-            StructField("ID", DoubleType(),True),
+            StructField("ID", IntegerType(),True),
             StructField("COL1", StringType(),True),
             StructField("COL2", StringType(),True),
-            StructField("DATA_REF", DoubleType(),True)
+            StructField("DATA_REF", StringType(),True)
         ])),
         StructField("source", StructType([
             StructField("version", StringType(),True),
             StructField("connector", StringType(),True),
             StructField("name", StringType(),True),
-            StructField("ts_ms", DoubleType(),True),
+            StructField("ts_ms", TimestampType(),True),
             StructField("snapshot", StringType(),True),
             StructField("db", StringType(),True),
             StructField("sequence", StringType(),True),
@@ -75,7 +78,7 @@ if __name__ == '__main__':
     #print(SparkConf().getAll())
 
     # set log level
-    spark.sparkContext.setLogLevel("INFO")
+    spark.sparkContext.setLogLevel("WARN")
 
 
     df = spark\
@@ -85,24 +88,22 @@ if __name__ == '__main__':
         .option('subscribe', KAFKA_TOPIC)\
         .option("startingOffsets", "earliest") \
         .load()\
-        .select(from_json(col('value').cast('string') , schema ,jsonOptions).alias('testeJson'))
+        .select(from_json(col('value').cast('string') , schema ,jsonOptions).alias('data'))
         
     newdf = df.select(
-        col('testeJson.after.ID').alias('ID'),
-        col('testeJson.after.COL1').alias('COL1'),
-        col('testeJson.after.COL2').alias('COL2'),
-        col('testeJson.after.DATA_REF').alias('DATA_REF'))
+        col('data.after.ID').alias('ID'),
+        col('data.after.COL1').alias('COL1'),
+        col('data.after.COL2').alias('COL2'),
+        col('data.after.DATA_REF').alias('DATA_REF'))
 
     newdf = newdf\
-        .withColumn("INTEGRATED_AT",to_timestamp(current_timestamp(),"dd-MM-yyyy HH:mm:ss"))\
+        .withColumn("INTEGRATED_AT",from_utc_timestamp(current_timestamp(),'UTC-3'))\
         .withColumn("ID",newdf.ID.cast('int'))\
-        .withColumn('DATA_REF', from_unixtime(col('DATA_REF').cast('bigint'), 'dd-MM-yyyy HH:mm:ss'))
-        #.withColumn('DATA_REF', to_timestamp(newdf.DATA_REF.cast('int'), 'dd-MM-yyyy HH:mm:ss'))
-    
-    #df_formatted = df.withColumn('formatted_timestamp', from_unixtime(col('double_col').cast('bigint'), 'yyyy-MM-dd HH:mm:ss'))
+        .withColumn("DATA_REF", from_unixtime(col("DATA_REF") / 1000).cast("timestamp"))
 
 
-    newdf.writeStream\
+    newdf.select('ID','COL1','COL2','DATA_REF','INTEGRATED_AT')\
+        .writeStream\
         .format("delta")\
         .outputMode("append")\
         .option("checkpointLocation", f"gs://{bucketprefix}-bronze/_STREAMTABLE_CTL")\
