@@ -17,9 +17,9 @@ if __name__ == '__main__':
         .builder \
         .appName('PoC - Lakehouse - GCP') \
         .master('local[*]')\
-        .config("spark.jars", f"{jarsHome}/gcs-connector-hadoop2-latest.jar") \
+        .config("spark.jars", "https://storage.googleapis.com/hadoop-lib/gcs/gcs-connector-hadoop3-latest.jar") \
         .config("spark.hadoop.google.cloud.auth.service.account.enable", "true") \
-        .config("spark.jars.packages", "io.delta:delta-core_2.12:1.2.1")\
+        .config('spark.jars.packages','org.apache.spark:spark-sql-kafka-0-10_2.12:3.4.0,io.delta:delta-core_2.12:1.2.1,com.google.cloud.bigdataoss:gcs-connector:hadoop2-2.1.3')\
         .config("spark.hadoop.google.cloud.auth.service.account.json.keyfile", GCS_KEY)\
         .config('spark.driver.extraClassPath', f"{jarsHome}/*")\
         .config('spark.delta.logStore.gs.impl','io.delta.storage.GCSLogStore')\
